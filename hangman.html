@@ -1,0 +1,194 @@
+<!-- Ramses Ordonez Simple Hangman Game -->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+	<h1>Simple Hangman</h1>
+	<br>
+	<div id="hangman"></div>
+	<br>
+	Word: 
+	<div id="spaces"></div>
+	
+	<br>
+	<div id="winloss"></div>
+	Misses:
+	<div id="misses"></div>
+	
+	<br>
+
+	<div class="alphabet">
+		<button type="button" class="letter" value="A">A</button>
+		<button type="button" class="letter" value="B">B</button>
+		<button type="button" class="letter" value="C">C</button>
+		<button type="button" class="letter" value="D">D</button>
+		<button type="button" class="letter" value="E">E</button>
+		<button type="button" class="letter" value="F">F</button>
+		<button type="button" class="letter" value="G">G</button>
+		<button type="button" class="letter" value="H">H</button>
+		<button type="button" class="letter" value="I">I</button>
+		<button type="button" class="letter" value="J">J</button>
+		<button type="button" class="letter" value="K">K</button>
+		<button type="button" class="letter" value="L">L</button>
+		<button type="button" class="letter" value="M">M</button>
+		<button type="button" class="letter" value="N">N</button>
+		<button type="button" class="letter" value="O">O</button>
+		<button type="button" class="letter" value="P">P</button>
+		<button type="button" class="letter" value="Q">Q</button>
+		<button type="button" class="letter" value="R">R</button>
+		<button type="button" class="letter" value="S">S</button>
+		<button type="button" class="letter" value="T">T</button>
+		<button type="button" class="letter" value="U">U</button>
+		<button type="button" class="letter" value="V">V</button>
+		<button type="button" class="letter" value="W">W</button>
+		<button type="button" class="letter" value="X">X</button>
+		<button type="button" class="letter" value="Y">Y</button>
+		<button type="button" class="letter" value="Z">Z</button>
+	</div>
+	
+	<button type="button" id="newgame">start new game</button>
+
+
+	<script type="text/javascript">
+		
+		let wordArr = ["quaere", "flagelliferous", "trin", "numismatics", "coehorn", "jejunator"];
+		let correctCharArr = [];
+		let chosenWord = "";
+		let chosenWordLength = "";
+		
+		let misses = 0;
+		let currCharCount = 0;
+
+		newWord();
+		refreshMisses();
+		displaySpaces();
+
+		let winningPhrase = "You won. Press New Game to play again.";
+		let losingPhrase = "You lost. The word was '" + chosenWord + "'. Press New Game to play again.";
+
+		
+
+		//resets the game
+		$(document).ready(function(){
+			$("#newgame").click(function(){
+				newWord();
+				currCharCount = 0;
+				misses = 0;
+				correctCharArr = [];
+				refreshMisses();
+				displaySpaces();
+				$("#winloss").html("");
+				$("#hangman").html("");
+				losingPhrase = "You lost. The word was '" + chosenWord + "'. Press New Game to play again.";
+
+				var allLetters = document.getElementsByClassName("letter");
+				for(i = 0; i < allLetters.length; i++){
+					allLetters[i].style.visibility = "visible";
+					$(allLetters[i]).css("background-color", "white");
+				}
+			});
+		});
+
+		//when a letter is pressed, check if it contained in the word
+		$(document).ready(function() {
+		 	$(".letter").click(function() {
+		 		if(misses == 7)
+		 			return;
+			  	let letter = ($(this).val()).toLowerCase();
+
+			  	if(!correctCharArr.includes(letter) && chosenWord.includes(letter)){
+			  		correctCharArr.push(letter);
+			  		for(i = 0; i < chosenWordLength; i++){
+			  			if(chosenWord[i]===letter){
+			  				currCharCount++;
+			  			}
+			  		}
+
+			  		updateWord();
+
+			  		$(this).css("background-color", "#4CAF50");
+
+			  		if(currCharCount == chosenWordLength){
+			  			$("#winloss").html(winningPhrase);
+			  		}
+
+			  	}
+			  	else{
+			  		$(this).css("visibility", "hidden");
+			  		misses++;
+			  		refreshMisses();
+			  		drawHangman();
+				  	if(misses == 7){
+				  		$("#winloss").html(losingPhrase);
+				  	}
+			  	}
+			  	
+		 	});
+		 	
+		});
+
+		function drawHangman(){
+			let hangman = ["&nbsp;&nbsp;|", "&nbsp;&nbsp;|", "&nbsp;&nbsp;o", "--|--", "&nbsp;&nbsp;&nbsp;|", "&nbsp;/", "&nbsp;&nbsp;&nbsp;\\"];
+			$("#hangman").html("");
+			for(i = 0; i < misses; i++){
+				$("#hangman").append(hangman[i]);
+				if(i < 5){
+					$("#hangman").append("<br>");
+				}
+			}
+		}
+		function updateWord(){
+			let displayString = "";
+			for(i = 0; i < chosenWordLength; i++){
+				if(correctCharArr.includes(chosenWord[i])){
+					displayString += chosenWord[i] + " ";
+				}
+				else{
+					displayString += "_ ";
+				}
+			}
+			$("#spaces").html(displayString);
+		}
+
+		//choose new word and reset corresponding values
+		function newWord(){
+			let randomNumber = Math.floor(Math.random() * wordArr.length);
+			chosenWord = wordArr[randomNumber];
+			chosenWordLength = chosenWord.length;
+			
+		}
+
+		//display underscores equivalet to the length of the chosen word
+		function displaySpaces(){
+			$(document).ready(function(){
+
+				let spaceString = ""; 
+				for(i = 0; i < chosenWordLength; i++){
+					spaceString+= "_ ";
+				}
+				spaceString = spaceString.trim();
+				displayString = spaceString;
+				
+				$("#spaces").html(spaceString);
+			})
+		}
+
+		//display current count of misses
+		function refreshMisses(){
+			if(misses > 7)
+				return;
+			else{
+				$(document).ready(function(){
+					let missString = misses + "/7";
+					$("#misses").html(missString);
+				})
+			}
+		}
+	</script>
+
+</body>
+</html>
